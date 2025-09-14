@@ -1,0 +1,249 @@
+‏local plr = game.Players.LocalPlayer
+‏local gui = Instance.new("ScreenGui", plr.PlayerGui)
+‏gui.Name = "DeltaMenu_rafik"
+‏
+‏-- دائرة الهكر بصورة افتراضية دائرية
+‏local circle = Instance.new("ImageButton", gui)
+‏circle.Size = UDim2.new(0, 54, 0, 54)
+‏circle.Position = UDim2.new(0, 18, 0.5, -27)
+‏circle.BackgroundTransparency = 1
+‏circle.Image = "rbxassetid://6031071050" -- صورة دائرية جاهزة من Roblox
+‏
+‏-- اللوحة (صغيرة + متحركة)
+‏local frame = Instance.new("Frame", gui)
+‏frame.Size = UDim2.new(0, 250, 0, 340)
+‏frame.Position = UDim2.new(0.5, -125, 0.5, -170)
+‏frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+‏frame.Visible = false
+‏frame.BorderSizePixel = 0
+‏frame.Active = true
+‏frame.Draggable = true -- لجعل اللوحة متحركة
+‏
+‏-- الحقوق في الأعلى
+‏local creditTop = Instance.new("TextLabel", frame)
+‏creditTop.Text = "المطور رفيق س.ي"
+‏creditTop.Size = UDim2.new(1,0,0,30)
+‏creditTop.Position = UDim2.new(0,0,0,0)
+‏creditTop.BackgroundTransparency = 1
+‏creditTop.TextColor3 = Color3.fromRGB(255, 200, 0)
+‏creditTop.Font = Enum.Font.SourceSansBold
+‏creditTop.TextSize = 21
+‏
+‏-- زر الإغلاق
+‏local close = Instance.new("TextButton", frame)
+‏close.Size = UDim2.new(0,24,0,24)
+‏close.Position = UDim2.new(1, -28, 0, 4)
+‏close.Text = "X"
+‏close.TextColor3 = Color3.new(1,0,0)
+‏close.BackgroundColor3 = Color3.fromRGB(50,50,50)
+‏close.Font = Enum.Font.SourceSansBold
+‏close.TextSize = 18
+‏close.AutoButtonColor = true
+‏
+‏-- عنوان اللوحة
+‏local title = Instance.new("TextLabel", frame)
+‏title.Text = "لوحة سكربت دلتا"
+‏title.Size = UDim2.new(1,0,0,26)
+‏title.Position = UDim2.new(0,0,0,30)
+‏title.BackgroundTransparency = 1
+‏title.TextColor3 = Color3.new(1,1,1)
+‏title.Font = Enum.Font.SourceSansBold
+‏title.TextSize = 17
+‏
+‏-- الوظائف: فتح وغلق اللوحة
+‏circle.MouseButton1Click:Connect(function()
+‏	frame.Visible = true
+‏end)
+‏close.MouseButton1Click:Connect(function()
+‏	frame.Visible = false
+‏end)
+‏
+‏-----------------------------------
+‏-- الأزرار مرتبة في عمود لتناسب اللوحة الصغيرة
+‏local yStart = 65
+‏local yStep = 34
+‏
+‏local function makeButton(txt, clr, callback)
+‏	local btn = Instance.new("TextButton", frame)
+‏	btn.Text = txt
+‏	btn.Size = UDim2.new(1, -22, 0, 28)
+‏	btn.Position = UDim2.new(0, 11, 0, yStart)
+‏	btn.BackgroundColor3 = clr or Color3.fromRGB(80,80,80)
+‏	btn.TextColor3 = Color3.new(1,1,1)
+‏	btn.Font = Enum.Font.SourceSansBold
+‏	btn.TextSize = 15
+‏	btn.AutoButtonColor = true
+‏	yStart = yStart + yStep
+‏	if callback then btn.MouseButton1Click:Connect(callback) end
+‏	return btn
+‏end
+‏
+‏-- التخفي
+‏makeButton("التخفي", Color3.fromRGB(80,80,80), function()
+‏	for _,v in pairs(plr.Character:GetDescendants()) do
+‏		if v:IsA("BasePart") then v.Transparency = 1 end
+‏	end
+‏end)
+‏makeButton("إلغاء التخفي", Color3.fromRGB(50,50,50), function()
+‏	for _,v in pairs(plr.Character:GetDescendants()) do
+‏		if v:IsA("BasePart") then v.Transparency = 0 end
+‏	end
+‏end)
+‏
+‏-- اختراق الجدران
+‏local noclip = false
+‏local noclipConn
+‏makeButton("اختراق الجدران", Color3.fromRGB(80,80,80), function()
+‏	noclip = true
+‏	if not noclipConn then
+‏		noclipConn = game:GetService("RunService").Stepped:Connect(function()
+‏			if noclip and plr.Character then
+‏				for _,v in pairs(plr.Character:GetDescendants()) do
+‏					if v:IsA("BasePart") then v.CanCollide = false end
+‏				end
+‏			end
+‏		end)
+‏	end
+‏end)
+‏makeButton("إلغاء اختراق الجدران", Color3.fromRGB(50,50,50), function()
+‏	noclip = false
+‏	for _,v in pairs(plr.Character:GetDescendants()) do
+‏		if v:IsA("BasePart") then v.CanCollide = true end
+‏	end
+‏end)
+‏
+‏-- الطيران
+‏local flying = false
+‏local bp, bg
+‏local mouse = plr:GetMouse()
+‏makeButton("الطيران", Color3.fromRGB(80,80,80), function()
+‏	if not flying then
+‏		flying = true
+‏		bp = Instance.new("BodyPosition", plr.Character.HumanoidRootPart)
+‏		bg = Instance.new("BodyGyro", plr.Character.HumanoidRootPart)
+‏		bp.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+‏		bg.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
+‏		while flying do
+‏			bp.Position = plr.Character.HumanoidRootPart.Position + (mouse.Hit.LookVector * 2) + Vector3.new(0,2,0)
+‏			bg.CFrame = workspace.CurrentCamera.CFrame
+‏			wait(0.1)
+‏		end
+‏	end
+‏end)
+‏makeButton("إلغاء الطيران", Color3.fromRGB(50,50,50), function()
+‏	flying = false
+‏	if bp then bp:Destroy() end
+‏	if bg then bg:Destroy() end
+‏end)
+‏
+‏-- الانتقال الفوري للاعب
+‏makeButton("انتقال فوري للاعب", Color3.fromRGB(90,90,150), function()
+‏	if gui:FindFirstChild("PlayerListTP") then
+‏		gui.PlayerListTP:Destroy()
+‏	end
+‏	local list = Instance.new("Frame", gui)
+‏	list.Name = "PlayerListTP"
+‏	list.Size = UDim2.new(0,180,0,32+#(game.Players:GetPlayers())*28)
+‏	list.Position = UDim2.new(0.5, 100, 0.5, -100)
+‏	list.BackgroundColor3 = Color3.fromRGB(40,40,70)
+‏	list.BorderSizePixel = 0
+‏
+‏	local y = 0
+‏	for _,v in pairs(game.Players:GetPlayers()) do
+‏		if v ~= plr and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+‏			local btn = Instance.new("TextButton", list)
+‏			btn.Size = UDim2.new(1,0,0,26)
+‏			btn.Position = UDim2.new(0,0,0,y*27)
+‏			btn.Text = v.Name
+‏			btn.TextColor3 = Color3.new(1,1,1)
+‏			btn.BackgroundColor3 = Color3.fromRGB(60,60,80)
+‏			btn.Font = Enum.Font.SourceSansBold
+‏			btn.TextSize = 14
+‏			btn.MouseButton1Click:Connect(function()
+‏				plr.Character:MoveTo(v.Character.HumanoidRootPart.Position + Vector3.new(0,3,0))
+‏				list:Destroy()
+‏			end)
+‏			y = y + 1
+‏		end
+‏	end
+‏	local closeBtn = Instance.new("TextButton", list)
+‏	closeBtn.Size = UDim2.new(1,0,0,22)
+‏	closeBtn.Position = UDim2.new(0,0,1,-22)
+‏	closeBtn.Text = "إغلاق"
+‏	closeBtn.TextColor3 = Color3.new(1,0,0)
+‏	closeBtn.BackgroundColor3 = Color3.fromRGB(70,40,40)
+‏	closeBtn.Font = Enum.Font.SourceSansBold
+‏	closeBtn.TextSize = 13
+‏	closeBtn.MouseButton1Click:Connect(function()
+‏		list:Destroy()
+‏	end)
+‏end)
+‏
+‏-- التجسس على لاعب (رؤية الكاميرا)
+‏makeButton("تجسس على لاعب", Color3.fromRGB(120,80,180), function()
+‏	if gui:FindFirstChild("PlayerListSPY") then
+‏		gui.PlayerListSPY:Destroy()
+‏	end
+‏	local list = Instance.new("Frame", gui)
+‏	list.Name = "PlayerListSPY"
+‏	list.Size = UDim2.new(0,180,0,32+#(game.Players:GetPlayers())*28)
+‏	list.Position = UDim2.new(0.5, 100, 0.5, 60)
+‏	list.BackgroundColor3 = Color3.fromRGB(60,40,100)
+‏	list.BorderSizePixel = 0
+‏
+‏	local y = 0
+‏	for _,v in pairs(game.Players:GetPlayers()) do
+‏		if v ~= plr and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+‏			local btn = Instance.new("TextButton", list)
+‏			btn.Size = UDim2.new(1,0,0,26)
+‏			btn.Position = UDim2.new(0,0,0,y*27)
+‏			btn.Text = v.Name
+‏			btn.TextColor3 = Color3.new(1,1,1)
+‏			btn.BackgroundColor3 = Color3.fromRGB(140,60,180)
+‏			btn.Font = Enum.Font.SourceSansBold
+‏			btn.TextSize = 14
+‏			btn.MouseButton1Click:Connect(function()
+‏				workspace.CurrentCamera.CameraSubject = v.Character.Humanoid
+‏				list:Destroy()
+‏				-- زر إرجاع الكاميرا
+‏				if not gui:FindFirstChild("StopSpy") then
+‏					local stopBtn = Instance.new("TextButton", gui)
+‏					stopBtn.Name = "StopSpy"
+‏					stopBtn.Size = UDim2.new(0,120,0,28)
+‏					stopBtn.Position = UDim2.new(0.5, 90, 0.5, 120)
+‏					stopBtn.Text = "إيقاف التجسس"
+‏					stopBtn.TextColor3 = Color3.fromRGB(255,255,255)
+‏					stopBtn.BackgroundColor3 = Color3.fromRGB(200,0,100)
+‏					stopBtn.Font = Enum.Font.SourceSansBold
+‏					stopBtn.TextSize = 14
+‏					stopBtn.MouseButton1Click:Connect(function()
+‏						workspace.CurrentCamera.CameraSubject = plr.Character:FindFirstChildWhichIsA("Humanoid")
+‏						stopBtn:Destroy()
+‏					end)
+‏				end
+‏			end)
+‏			y = y + 1
+‏		end
+‏	end
+‏	local closeBtn = Instance.new("TextButton", list)
+‏	closeBtn.Size = UDim2.new(1,0,0,22)
+‏	closeBtn.Position = UDim2.new(0,0,1,-22)
+‏	closeBtn.Text = "إغلاق"
+‏	closeBtn.TextColor3 = Color3.new(1,0,0)
+‏	closeBtn.BackgroundColor3 = Color3.fromRGB(70,40,40)
+‏	closeBtn.Font = Enum.Font.SourceSansBold
+‏	closeBtn.TextSize = 13
+‏	closeBtn.MouseButton1Click:Connect(function()
+‏		list:Destroy()
+‏	end)
+‏end)
+‏
+‏-- الحقوق في الأسفل
+‏local creditBottom = Instance.new("TextLabel", frame)
+‏creditBottom.Text = "instagram: rafik xzz"
+‏creditBottom.Size = UDim2.new(1,0,0,23)
+‏creditBottom.Position = UDim2.new(0,0,1,-23)
+‏creditBottom.BackgroundTransparency = 1
+‏creditBottom.TextColor3 = Color3.fromRGB(150, 50, 250)
+‏creditBottom.Font = Enum.Font.SourceSansBold
+‏creditBottom.TextSize = 15
